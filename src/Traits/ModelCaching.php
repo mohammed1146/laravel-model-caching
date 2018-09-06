@@ -1,4 +1,5 @@
-<?php namespace GeneaLabs\LaravelModelCaching\Traits;
+<?php 
+namespace GeneaLabs\LaravelModelCaching\Traits;
 
 use Carbon\Carbon;
 use GeneaLabs\LaravelModelCaching\CachedBuilder;
@@ -6,6 +7,12 @@ use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
 trait ModelCaching
 {
+    /**
+     * get all 
+     *
+     * @param array $columns
+     * @return void
+     */
     public static function all($columns = ['*'])
     {
         if (config('laravel-model-caching.disabled')) {
@@ -23,6 +30,11 @@ trait ModelCaching
             });
     }
 
+    /**
+     * boot cachable
+     *
+     * @return void
+     */
     public static function bootCachable()
     {
         static::created(function ($instance) {
@@ -54,16 +66,30 @@ trait ModelCaching
             $instance->checkCooldownAndFlushAfterPersiting($instance);
         });
     }
-
+    
+    /**
+     * destroy cache
+     *
+     * @param [type] $ids
+     * @return void
+     */
     public static function destroy($ids)
     {
         $class = get_called_class();
+
         $instance = new $class;
+
         $instance->flushCache();
 
         return parent::destroy($ids);
     }
 
+    /**
+     * name new elqouant builder
+     *
+     * @param [type] $query
+     * @return void
+     */
     public function newEloquentBuilder($query)
     {
         if (! $this->isCachable()) {
@@ -75,6 +101,12 @@ trait ModelCaching
         return new CachedBuilder($query);
     }
 
+    /**
+     * scope disable cache
+     *
+     * @param EloquentBuilder $query
+     * @return EloquentBuilder
+     */
     public function scopeDisableCache(EloquentBuilder $query) : EloquentBuilder
     {
         if ($this->isCachable()) {
@@ -84,12 +116,22 @@ trait ModelCaching
         return $query;
     }
 
+    /**
+     * scope with cachecool down seconds
+     *
+     * @param EloquentBuilder $query
+     * @param integer $seconds
+     * @return EloquentBuilder
+     */
     public function scopeWithCacheCooldownSeconds(
         EloquentBuilder $query,
         int $seconds
-    ) : EloquentBuilder {
+    ) : EloquentBuilder 
+    {
         $cachePrefix = $this->getCachePrefix();
+
         $modelClassName = get_class($this);
+
         $cacheKey = "{$cachePrefix}:{$modelClassName}-cooldown:seconds";
 
         $this->cache()
@@ -98,6 +140,7 @@ trait ModelCaching
             });
 
         $cacheKey = "{$cachePrefix}:{$modelClassName}-cooldown:invalidated-at";
+
         $this->cache()
             ->rememberForever($cacheKey, function () {
                 return (new Carbon)->now();

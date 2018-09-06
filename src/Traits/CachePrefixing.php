@@ -1,7 +1,13 @@
-<?php namespace GeneaLabs\LaravelModelCaching\Traits;
+<?php 
+namespace GeneaLabs\LaravelModelCaching\Traits;
 
 trait CachePrefixing
 {
+    /**
+     * get cache prefix
+     *
+     * @return string
+     */
     protected function getCachePrefix() : string
     {
         return "genealabs:laravel-model-caching:"
@@ -12,11 +18,21 @@ trait CachePrefixing
                 : "");
     }
 
+    /**
+     * get database connection name
+     *
+     * @return string
+     */
     protected function getDatabaseConnectionName() : string
     {
         return $this->query->connection->getName();
     }
 
+    /**
+     * get database name
+     *
+     * @return string
+     */
     protected function getDatabaseName() : string
     {
         return $this->query->connection->getDatabaseName();

@@ -5,9 +5,15 @@ use Illuminate\Support\Collection;
 
 class Clear extends Command
 {
-    protected $signature = 'modelCache:clear {--model=}';
-    protected $description = 'Flush cache for a given model. If no model is given, entire model-cache is flushed.';
+    protected 
+        $signature = 'modelCache:clear {--model=}',
+        $description = 'Flush cache for a given model. If no model is given, entire model-cache is flushed.';
 
+    /**
+     * handle model cache
+     *
+     * @return void
+     */
     public function handle()
     {
         $option = $this->option('model');
@@ -19,6 +25,11 @@ class Clear extends Command
         return $this->flushModelCache($option);
     }
 
+    /**
+     * flush entire cache
+     *
+     * @return integer
+     */
     protected function flushEntireCache() : int
     {
         cache()
@@ -30,6 +41,12 @@ class Clear extends Command
         return 0;
     }
 
+    /**
+     * flush model cache
+     *
+     * @param string $option
+     * @return integer
+     */
     protected function flushModelCache(string $option) : int
     {
         $model = new $option;
@@ -49,7 +66,13 @@ class Clear extends Command
         return 0;
     }
 
-    /** @SuppressWarnings(PHPMD.BooleanArgumentFlag) */
+   /**
+    * get all traits usesd by the given class name
+    *
+    * @param string $classname
+    * @param boolean $autoload
+    * @return Collection
+    */
     protected function getAllTraitsUsedByClass(
         string $classname,
         bool $autoload = true

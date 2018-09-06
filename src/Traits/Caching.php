@@ -1,4 +1,5 @@
-<?php namespace GeneaLabs\LaravelModelCaching\Traits;
+<?php 
+namespace GeneaLabs\LaravelModelCaching\Traits;
 
 use Carbon\Carbon;
 use GeneaLabs\LaravelModelCaching\CacheKey;
@@ -11,6 +12,12 @@ trait Caching
 {
     protected $isCachable = true;
 
+    /**
+     * do caching for the given array
+     *
+     * @param array $tags
+     * @return void
+     */
     public function cache(array $tags = [])
     {
         $cache = cache();
@@ -26,6 +33,11 @@ trait Caching
         return $cache;
     }
 
+    /**
+     * disable model caching
+     *
+     * @return void
+     */
     public function disableModelCaching()
     {
         $this->isCachable = false;
@@ -33,6 +45,12 @@ trait Caching
         return $this;
     }
 
+    /**
+     * flush Cache
+     *
+     * @param array $tags
+     * @return void
+     */
     public function flushCache(array $tags = [])
     {
         if (count($tags) === 0) {
@@ -55,6 +73,11 @@ trait Caching
         }
     }
 
+    /**
+     * get cache prefix
+     *
+     * @return string
+     */
     protected function getCachePrefix() : string
     {
         return "genealabs:laravel-model-caching:"
@@ -63,11 +86,20 @@ trait Caching
                 : "");
     }
 
+    /**
+     * make cache key
+     *
+     * @param array $columns
+     * @param [type] $idColumn
+     * @param string $keyDifferentiator
+     * @return string
+     */
     protected function makeCacheKey(
         array $columns = ['*'],
         $idColumn = null,
         string $keyDifferentiator = ''
-    ) : string {
+    ) : string 
+    {
         $eagerLoad = $this->eagerLoad ?? [];
         $model = $this->model ?? $this;
         $query = $this->query ?? app(Builder::class);
@@ -76,6 +108,11 @@ trait Caching
             ->make($columns, $idColumn, $keyDifferentiator);
     }
 
+    /**
+     * make cache tags
+     *
+     * @return array
+     */
     protected function makeCacheTags() : array
     {
         $eagerLoad = $this->eagerLoad ?? [];
@@ -88,6 +125,12 @@ trait Caching
         return $tags;
     }
 
+    /**
+     * get model cache cool down
+     *
+     * @param Model $instance
+     * @return void
+     */
     public function getModelCacheCooldown(Model $instance)
     {
         $cachePrefix = $this->getCachePrefix();
@@ -106,6 +149,14 @@ trait Caching
         ];
     }
 
+    /**
+     * get cache cool down details
+     *
+     * @param Model $instance
+     * @param string $cachePrefix
+     * @param string $modelClassName
+     * @return array
+     */
     protected function getCacheCooldownDetails(
         Model $instance,
         string $cachePrefix,
@@ -124,6 +175,12 @@ trait Caching
         ];
     }
 
+    /**
+     * check cool down and remove if expired
+     *
+     * @param Model $instance
+     * @return void
+     */
     protected function checkCooldownAndRemoveIfExpired(Model $instance)
     {
         [$cacheCooldown, $invalidatedAt] = $this->getModelCacheCooldown($instance);
@@ -149,6 +206,12 @@ trait Caching
         $instance->flushCache();
     }
 
+    /**
+     * check cooldown and flush after persiting
+     *
+     * @param Model $instance
+     * @return void
+     */
     protected function checkCooldownAndFlushAfterPersiting(Model $instance)
     {
         [$cacheCooldown, $invalidatedAt] = $instance->getModelCacheCooldown($instance);
@@ -166,12 +229,23 @@ trait Caching
         }
     }
 
+    /**
+     * check if is cachable
+     *
+     * @return boolean
+     */
     public function isCachable() : bool
     {
         return $this->isCachable
             && ! config('laravel-model-caching.disabled');
     }
 
+    /**
+     * set cache cooldown and save timestamps
+     *
+     * @param Model $instance
+     * @return void
+     */
     protected function setCacheCooldownSavedAtTimestamp(Model $instance)
     {
         $cachePrefix = $this->getCachePrefix();
